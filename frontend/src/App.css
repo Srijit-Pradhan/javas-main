@@ -21,23 +21,32 @@ body {
   max-width: 300px;
 }
 
+.home-input-only {
+  width: min(420px, calc(100% - 32px));
+  height: 100vh;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+}
+
 h1 {
   margin: 0 0 12px;
   font-size: 24px;
 }
 
 .top-row {
-  display: inline-flex;
-  gap: 10px;
-  margin-bottom: 12px;
-  width: fit-content;
-  max-width: 100%;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  z-index: 1;
+  display: block;
+  width: 100%;
+  background: #000000;
 }
 
 .top-row input {
-  flex: 0 1 260px;
-  min-width: 0;
-  width: auto;
+  width: 100%;
   padding: 6px 8px;
   font-size: 14px;
 }
@@ -67,6 +76,13 @@ textarea {
   padding: 8px;
 }
 
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: #ffffff;
+  box-shadow: none;
+}
+
 input::placeholder,
 textarea::placeholder {
   color: #cccccc;
@@ -78,6 +94,13 @@ textarea {
 
 .list {
   border: 1px solid #ffffff;
+  position: absolute;
+  top: calc(50% + 42px);
+  left: 0;
+  right: 0;
+  bottom: 24px;
+  max-height: none;
+  overflow-y: auto;
 }
 
 .list-item {

@@ -6,24 +6,33 @@ const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
 function HomePage() {
   const [search, setSearch] = useState("");
   const [programs, setPrograms] = useState([]);
+  const [hasSearched, setHasSearched] = useState(false);
   const [copiedId, setCopiedId] = useState("");
 
   useEffect(() => {
     const controller = new AbortController();
+    const query = search.trim();
+
+    if (!query) {
+      setPrograms([]);
+      setHasSearched(false);
+      return () => controller.abort();
+    }
 
     const loadPrograms = async () => {
-      const query = search.trim();
-      const endpoint = query
-        ? `${API_BASE}/search?q=${encodeURIComponent(query)}`
-        : `${API_BASE}/all`;
-
       try {
-        const response = await fetch(endpoint, { signal: controller.signal });
+        const response = await fetch(
+          `${API_BASE}/search?q=${encodeURIComponent(query)}`,
+          { signal: controller.signal }
+        );
+
         if (!response.ok) {
           return;
         }
+
         const data = await response.json();
         setPrograms(data);
+        setHasSearched(true);
       } catch (_error) {}
     };
 
@@ -47,35 +56,35 @@ function HomePage() {
         document.execCommand("copy");
         document.body.removeChild(textArea);
       }
+
       setCopiedId(id);
       setTimeout(() => setCopiedId(""), 1200);
     } catch (_error) {}
   };
 
   return (
-    <div className="page home-page">
+    <div className="home-input-only">
       <div className="top-row">
         <input
           type="text"
-          placeholder="Search by title/keywords"
+          placeholder="Search by question/ main keyword"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <Link to="/add" className="link-btn">
-          Add Code
-        </Link>
       </div>
 
-      <div className="list">
-        {programs.map((item) => (
-          <div className="list-item" key={item._id}>
-            <span>{item.title}</span>
-            <button type="button" onClick={() => handleCopy(item._id, item.code)}>
-              {copiedId === item._id ? "Copied" : "Copy"}
-            </button>
-          </div>
-        ))}
-      </div>
+      {hasSearched && (
+        <div className="list">
+          {programs.map((item) => (
+            <div className="list-item" key={item._id}>
+              <span>{item.title}</span>
+              <button type="button" onClick={() => handleCopy(item._id, item.code)}>
+                {copiedId === item._id ? "Copied" : "Copy"}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
