@@ -24,8 +24,7 @@ function HomePage() {
         }
         const data = await response.json();
         setPrograms(data);
-      } catch (_error) {
-      }
+      } catch (_error) {}
     };
 
     loadPrograms();
@@ -35,19 +34,26 @@ function HomePage() {
 
   const handleCopy = async (id, code) => {
     try {
-      await navigator.clipboard.writeText(code);
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(code);
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = code;
+        textArea.style.position = "fixed";
+        textArea.style.opacity = "0";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+      }
       setCopiedId(id);
-
-      setTimeout(() => {
-        setCopiedId("");
-      }, 1200);
-    } catch (_error) {
-    }
+      setTimeout(() => setCopiedId(""), 1200);
+    } catch (_error) {}
   };
 
   return (
     <div className="page home-page">
-
       <div className="top-row">
         <input
           type="text"
@@ -96,8 +102,7 @@ function AddCodePage() {
         setTitle("");
         setCode("");
       }
-    } catch (_error) {
-    }
+    } catch (_error) {}
   };
 
   return (
