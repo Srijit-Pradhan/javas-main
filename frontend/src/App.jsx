@@ -6,25 +6,19 @@ const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
 function HomePage() {
   const [search, setSearch] = useState("");
   const [programs, setPrograms] = useState([]);
-  const [hasSearched, setHasSearched] = useState(false);
   const [copiedId, setCopiedId] = useState("");
+  const [previewProgram, setPreviewProgram] = useState(null);
 
   useEffect(() => {
     const controller = new AbortController();
     const query = search.trim();
-
-    if (!query) {
-      setPrograms([]);
-      setHasSearched(false);
-      return () => controller.abort();
-    }
+    const endpoint = query
+      ? `${API_BASE}/search?q=${encodeURIComponent(query)}`
+      : `${API_BASE}/all`;
 
     const loadPrograms = async () => {
       try {
-        const response = await fetch(
-          `${API_BASE}/search?q=${encodeURIComponent(query)}`,
-          { signal: controller.signal }
-        );
+        const response = await fetch(endpoint, { signal: controller.signal });
 
         if (!response.ok) {
           return;
@@ -32,7 +26,6 @@ function HomePage() {
 
         const data = await response.json();
         setPrograms(data);
-        setHasSearched(true);
       } catch (_error) {}
     };
 
@@ -73,16 +66,33 @@ function HomePage() {
         />
       </div>
 
-      {hasSearched && (
-        <div className="list">
-          {programs.map((item) => (
-            <div className="list-item" key={item._id}>
-              <span>{item.title}</span>
+      <div className="list">
+        {programs.map((item) => (
+          <div className="list-item" key={item._id}>
+            <span>{item.title}</span>
+            <div className="row-actions">
+              <button type="button" onClick={() => setPreviewProgram(item)}>
+                Preview
+              </button>
               <button type="button" onClick={() => handleCopy(item._id, item.code)}>
                 {copiedId === item._id ? "Copied" : "Copy"}
               </button>
             </div>
-          ))}
+          </div>
+        ))}
+      </div>
+
+      {previewProgram && (
+        <div className="preview-backdrop" onClick={() => setPreviewProgram(null)}>
+          <div className="preview-panel" onClick={(e) => e.stopPropagation()}>
+            <div className="preview-header">
+              <h2>{previewProgram.title}</h2>
+              <button type="button" onClick={() => setPreviewProgram(null)}>
+                Close
+              </button>
+            </div>
+            <pre className="preview-code">{previewProgram.code}</pre>
+          </div>
         </div>
       )}
     </div>
